@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "1059392843085",
+    "project_id": "magicurl",
+    "storage_bucket": "magicurl.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1059392843085:android:093f5c58e8a7a02a6e9b04",
+        "android_client_info": {
+          "package_name": "com.magicurl"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1059392843085-fsuem01kpoc1i1gv3jamm5t1th0kv2sr.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.magicurl",
+            "certificate_hash": "c69f50f59a5c599e63610b6b9dde52b2a8acc9bf"
+          }
+        },
+        {
+          "client_id": "1059392843085-ldovo98s8uchg8c6n31je5j7n4k9be7d.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyApxbJ-WhaTes5QPdg7003NQmDFkDfue3w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1059392843085-ldovo98s8uchg8c6n31je5j7n4k9be7d.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
