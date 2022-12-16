@@ -11,7 +11,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import kotlinx.android.synthetic.main.activity_register.*
 
-// TODO Step 6: Create an empty activity as Register Activity.
+
 /**
  * Register Screen of the application.
  */
@@ -26,8 +26,6 @@ class RegisterActivity : AppCompatActivity() {
         // This is used to align the xml view to this class
         setContentView(R.layout.activity_register)
 
-        // TODO Step 9: Assign the click event to the register button and perform the functionality.
-        // START
         btn_register.setOnClickListener {
             when {
                 TextUtils.isEmpty(et_register_email.text.toString().trim { it <= ' ' }) -> {
@@ -91,10 +89,8 @@ class RegisterActivity : AppCompatActivity() {
                 }
             }
         }
-        // END
 
-        // TODO Step 14: Assign the click event to the Login text and launch the login screen.
-        // START
+
 
         tv_login.setOnClickListener {
 
@@ -102,6 +98,6 @@ class RegisterActivity : AppCompatActivity() {
         }
 
 
-        // END
+
     }
 }
