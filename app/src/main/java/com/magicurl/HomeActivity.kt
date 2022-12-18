@@ -1,11 +1,13 @@
 package com.magicurl
 
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.text.TextUtils
 import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_home.*
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.activity_search.*
 import java.io.BufferedReader
 import java.io.DataOutputStream
 import java.io.InputStreamReader
@@ -17,6 +19,21 @@ class HomeActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_home)
+
+        home_search.setOnClickListener {
+
+            startActivity(Intent(this@HomeActivity, SearchActivity::class.java))
+        }
+        home_star.setOnClickListener {
+
+            startActivity(Intent(this@HomeActivity, FavouriteActivity::class.java))
+        }
+        home_profile.setOnClickListener {
+
+            startActivity(Intent(this@HomeActivity, ProfileActivity::class.java))
+        }
+
+
 
         btn_short.setOnClickListener {
             // Prendere info da textbox
