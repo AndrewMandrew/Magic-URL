@@ -5,9 +5,12 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.text.TextUtils
 import android.widget.Toast
+import com.google.firebase.database.ktx.database
+import com.google.firebase.ktx.Firebase
 import kotlinx.android.synthetic.main.activity_home.*
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.activity_search.*
+import org.json.JSONObject
 import java.io.BufferedReader
 import java.io.DataOutputStream
 import java.io.InputStreamReader
@@ -81,7 +84,14 @@ class HomeActivity : AppCompatActivity() {
             BufferedReader(InputStreamReader(conn.inputStream)).use { br ->
                 var line: String?
                 while (br.readLine().also { line = it } != null) {
+                    // {"data":{"domain":"tinyurl.com","alias":"2tadbyva","deleted":false,"archived":false,"analytics":{"enabled":true,"public":false},"tags":[],"created_at":"2022-12-21T19:38:06+00:00","expires_at":null,"tiny_url":"https:\/\/tinyurl.com\/2tadbyva","url":"http:\/\/lol.com"},"code":0,"errors":[]}
                     println(line)
+                    val tiny_url = JSONObject(line).getJSONObject("data").get("tiny_url")
+
+                    val database = Firebase.database
+                    val tiny_url_name = database.getReference("urls").child("federico").child("test2")
+                    tiny_url_name.setValue(tiny_url)
+
                 }
             }
 
