@@ -24,7 +24,7 @@ class ForgotPasswordActivity : AppCompatActivity() {
                 }
 
                 else -> {
-                    val email: String = et_register_email.text.toString().trim { it <= ' ' }
+                    val email: String = et_update_mail.text.toString().trim { it <= ' ' }
 
                     FirebaseAuth.getInstance().setLanguageCode("en")
                     FirebaseAuth.getInstance().sendPasswordResetEmail(email)
