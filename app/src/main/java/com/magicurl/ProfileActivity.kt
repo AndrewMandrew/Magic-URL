@@ -1,8 +1,12 @@
 package com.magicurl
 
+import android.R
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.View
+import android.widget.EditText
+import androidx.appcompat.app.AppCompatActivity
+import com.google.firebase.auth.FirebaseAuth
 import kotlinx.android.synthetic.main.activity_profile.*
 
 
@@ -23,6 +27,16 @@ class ProfileActivity : AppCompatActivity() {
 
             startActivity(Intent(this@ProfileActivity, FavouriteActivity::class.java))
         }
+        btn_logout.setOnClickListener {
+            // Logout from app.
+            FirebaseAuth.getInstance().signOut()
 
+            startActivity(Intent(this@ProfileActivity, LoginActivity::class.java))
+            finish()
+        }
+        btn_modify.setOnClickListener{
+
+
+        }
     }
 }

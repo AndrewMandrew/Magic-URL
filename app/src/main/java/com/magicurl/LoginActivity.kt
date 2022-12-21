@@ -8,7 +8,6 @@ import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.android.synthetic.main.activity_login.*
 
-// TODO Step 1 : Create an empty activity as Login Activity.
 /**
  * Login Screen of the application.
  */
@@ -20,28 +19,21 @@ class LoginActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         //This call the parent constructor
         super.onCreate(savedInstanceState)
+
         // This is used to align the xml view to this class
         setContentView(R.layout.activity_login)
 
-        // TODO Step 13: Assign the click event to the Register text and launch the register screen.
-        // START
         tv_register.setOnClickListener {
 
             startActivity(Intent(this@LoginActivity, RegisterActivity::class.java))
         }
-        // END
 
-        // TODO Step 19: Assign the click event to the Forgot Password text and launch the Forgot Password Screen.
-        // START
         tv_forgot_password.setOnClickListener {
 
             // Launch the forgot password screen when the user clicks on the forgot password text.
             startActivity(Intent(this@LoginActivity, ForgotPasswordActivity::class.java))
         }
-        // END
 
-        // TODO Step 15: Assign the click event to the login button and add the feature to login.
-        // START
         btn_login.setOnClickListener {
 
             when {
