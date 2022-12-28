@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.text.TextUtils
 import android.widget.Toast
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 import kotlinx.android.synthetic.main.activity_home.*
@@ -78,7 +79,8 @@ class HomeActivity : AppCompatActivity() {
             val urlToShorten: String = et_home_url.text.toString().trim { it <= ' ' }
 
             val name: String = et_home_name.text.toString().trim() { it <= ' ' }
-            val userId = intent.getStringExtra("user_id").toString().substringBefore('@')
+            val userId = FirebaseAuth.getInstance().currentUser?.uid.toString()
+
 
             val url = URL("https://api.tinyurl.com/create")
             val postData = "api_token=BssoQFHyATXqAqm9D78h2qhYOmSwWdWI9Jbdo3sZ4PosD8sexO3DvoDjKdHA&url=$urlToShorten"
