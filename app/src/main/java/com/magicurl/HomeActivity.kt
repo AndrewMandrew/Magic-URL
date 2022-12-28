@@ -49,6 +49,14 @@ class HomeActivity : AppCompatActivity() {
                     ).show()
                 }
 
+                TextUtils.isEmpty(et_home_name.text.toString().trim {it <= ' '}) -> {
+                    Toast.makeText(
+                        this@HomeActivity,
+                        "Please enter a name for your URL!",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+
                 else -> {
                     magicifyLink().start()
                 }
@@ -68,6 +76,9 @@ class HomeActivity : AppCompatActivity() {
 
         return Thread {
             val urlToShorten: String = et_home_url.text.toString().trim { it <= ' ' }
+
+            val name: String = et_home_name.text.toString().trim() { it <= ' ' }
+            val userId = intent.getStringExtra("user_id").toString().substringBefore('@')
 
             val url = URL("https://api.tinyurl.com/create")
             val postData = "api_token=BssoQFHyATXqAqm9D78h2qhYOmSwWdWI9Jbdo3sZ4PosD8sexO3DvoDjKdHA&url=$urlToShorten"
@@ -89,7 +100,7 @@ class HomeActivity : AppCompatActivity() {
                     val tiny_url = JSONObject(line).getJSONObject("data").get("tiny_url")
 
                     val database = Firebase.database
-                    val tiny_url_name = database.getReference("urls").child("federico").child("test2")
+                    val tiny_url_name = database.getReference("urls").child(userId).child(name)
                     tiny_url_name.setValue(tiny_url)
 
                 }
