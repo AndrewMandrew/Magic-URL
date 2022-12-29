@@ -49,6 +49,9 @@ class ProfileActivity : AppCompatActivity() {
 
         }
 
+        var username = FirebaseAuth.getInstance().currentUser?.email.toString().substringBefore('@')
+        txt_username.text = username
+
         val magicLinks = getLinksFromDb()
 
         // Create an ArrayAdapter to bind the items to the ListView

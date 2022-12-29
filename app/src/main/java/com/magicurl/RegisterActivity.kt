@@ -71,7 +71,7 @@ class RegisterActivity : AppCompatActivity() {
                                      */
 
                                     val intent =
-                                        Intent(this@RegisterActivity, MainActivity::class.java)
+                                        Intent(this@RegisterActivity, LoginActivity::class.java)
                                     intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                                     intent.putExtra("user_id", firebaseUser.uid)
                                     intent.putExtra("email_id", email)
