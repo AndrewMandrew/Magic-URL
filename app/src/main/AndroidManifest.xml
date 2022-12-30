@@ -17,7 +17,8 @@
         <activity
             android:name=".ProfileActivity"
             android:exported="false"
-            android:theme="@style/Theme.MagicURL.NoActionBar">
+            android:theme="@style/Theme.MagicURL.NoActionBar"
+            android:windowSoftInputMode="adjustPan">
             <meta-data
                 android:name="android.app.lib_name"
                 android:value="" />
@@ -25,7 +26,8 @@
         <activity
             android:name=".SearchActivity"
             android:exported="false"
-            android:theme="@style/Theme.MagicURL.NoActionBar">
+            android:theme="@style/Theme.MagicURL.NoActionBar"
+            android:windowSoftInputMode="adjustPan">
             <meta-data
                 android:name="android.app.lib_name"
                 android:value="" />
@@ -34,7 +36,8 @@
             android:name=".FavouriteActivity"
             android:exported="false"
 
-            android:theme="@style/Theme.MagicURL.NoActionBar">
+            android:theme="@style/Theme.MagicURL.NoActionBar"
+            android:windowSoftInputMode="adjustPan">
             <meta-data
                 android:name="android.app.lib_name"
                 android:value="" />
@@ -43,13 +46,15 @@
             android:name=".HomeActivity"
             android:exported="false"
             android:label="@string/title_activity_home"
-            android:theme="@style/Theme.MagicURL.NoActionBar">
+            android:theme="@style/Theme.MagicURL.NoActionBar"
+            android:windowSoftInputMode="adjustPan">
             <meta-data
                 android:name="android.app.lib_name"
                 android:value="" />
         </activity>
         <activity
             android:name=".ForgotPasswordActivity"
+            android:theme="@style/Theme.MagicURL.NoActionBar"
             android:exported="false">
             <meta-data
                 android:name="android.app.lib_name"
@@ -57,6 +62,7 @@
         </activity>
         <activity
             android:name=".RegisterActivity"
+            android:theme="@style/Theme.MagicURL.NoActionBar"
             android:exported="true">
             <meta-data
                 android:name="android.app.lib_name"
@@ -64,6 +70,7 @@
         </activity>
         <activity
             android:name=".LoginActivity"
+            android:theme="@style/Theme.MagicURL.NoActionBar"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

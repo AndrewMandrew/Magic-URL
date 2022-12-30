@@ -60,6 +60,9 @@ class HomeActivity : AppCompatActivity() {
 
                 else -> {
                     magicifyLink().start()
+                    et_home_name.setText("")
+                    et_home_url.setText("")
+
                 }
             }
 
@@ -106,6 +109,7 @@ class HomeActivity : AppCompatActivity() {
                     tiny_url_name.setValue(tiny_url)
 
                 }
+
             }
 
             /*
@@ -119,5 +123,6 @@ class HomeActivity : AppCompatActivity() {
              */
 
         }
+
     }
 }
