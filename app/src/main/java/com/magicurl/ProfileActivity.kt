@@ -61,7 +61,7 @@ class ProfileActivity : AppCompatActivity() {
 
         val userId = FirebaseAuth.getInstance().currentUser?.uid.toString()
 
-        database.child("urls").child(userId).get().addOnSuccessListener {
+        database.child(userId).child("urls").get().addOnSuccessListener {
             Log.i("firebase", "Got value ${it.value}")
 
             val map = it.value
