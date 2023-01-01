@@ -10,9 +10,7 @@ import android.widget.ListView
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.*
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 import kotlinx.android.synthetic.main.activity_profile.*
@@ -52,35 +50,34 @@ class ProfileActivity : AppCompatActivity() {
         var username = FirebaseAuth.getInstance().currentUser?.email.toString().substringBefore('@')
         txt_username.text = username
 
-        val magicLinks = getLinksFromDb()
+        updateList()
 
-        // Create an ArrayAdapter to bind the items to the ListView
-        val adapter = ArrayAdapter(this@ProfileActivity, android.R.layout.simple_list_item_1, magicLinks)
-
-        // Set the adapter on the ListView
-        Url_list.adapter = adapter
 
     }
 
 
-    private fun getLinksFromDb(): List<Any> {
+    private fun updateList(){
         database = Firebase.database.reference
-
-        val magicLinks = hashMapOf<Any, Any>();
 
         val userId = FirebaseAuth.getInstance().currentUser?.uid.toString()
 
         database.child("urls").child(userId).get().addOnSuccessListener {
             Log.i("firebase", "Got value ${it.value}")
 
+            val map = it.value
+            val array = (map as MutableMap<*, *>).toList().toTypedArray()
 
+            // Create an ArrayAdapter to bind the items to the ListView
+            val adapter = ArrayAdapter(this@ProfileActivity, android.R.layout.simple_list_item_1, array)
+
+            // Set the adapter on the ListView
+            Url_list.adapter = adapter
+
+            println(map)
 
         }.addOnFailureListener{
             Log.e("firebase", "Error getting data", it)
         }
-
-        println(magicLinks)
-        return emptyList<Any>()
     }
 
 }
