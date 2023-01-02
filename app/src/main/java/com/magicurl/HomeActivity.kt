@@ -81,23 +81,27 @@ class HomeActivity : AppCompatActivity() {
 
         val userId = FirebaseAuth.getInstance().currentUser?.uid.toString()
 
-        database.child(userId).child("urls").get().addOnSuccessListener {
-            Log.i("firebase", "Got value ${it.value}")
 
-            val map = it.value
-            val array = (map as MutableMap<*, *>).toList().toTypedArray().takeLast(3)
+            database.child(userId).child("urls").get().addOnSuccessListener {
+                if(it.exists()) {
+                    Log.i("firebase", "Got value ${it.value}")
 
-            // Create an ArrayAdapter to bind the items to the ListView
-            val adapter = ArrayAdapter(this@HomeActivity, android.R.layout.simple_list_item_1, array)
+                    val map = it.value
+                    val array = (map as MutableMap<*, *>).toList().toTypedArray().takeLast(3)
 
-            // Set the adapter on the ListView
-            list_shorted.adapter = adapter
+                    // Create an ArrayAdapter to bind the items to the ListView
+                    val adapter =
+                        ArrayAdapter(this@HomeActivity, android.R.layout.simple_list_item_1, array)
 
-            println(map)
+                    // Set the adapter on the ListView
+                    list_shorted.adapter = adapter
 
-        }.addOnFailureListener{
-            Log.e("firebase", "Error getting data", it)
-        }
+                    println(map)
+                }
+            }.addOnFailureListener {
+                Log.e("firebase", "Error getting data", it)
+            }
+
     }
 
     private fun magicifyLink(): Thread

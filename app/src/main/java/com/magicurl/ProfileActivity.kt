@@ -43,7 +43,7 @@ class ProfileActivity : AppCompatActivity() {
             startActivity(Intent(this@ProfileActivity, LoginActivity::class.java))
             finish()
         }
-        btn_modify.setOnClickListener{
+        btn_modify.setOnClickListener {
 
         }
 
@@ -62,22 +62,23 @@ class ProfileActivity : AppCompatActivity() {
         val userId = FirebaseAuth.getInstance().currentUser?.uid.toString()
 
         database.child(userId).child("urls").get().addOnSuccessListener {
-            Log.i("firebase", "Got value ${it.value}")
+            if(it.exists()) {
+                Log.i("firebase", "Got value ${it.value}")
 
-            val map = it.value
-            val array = (map as MutableMap<*, *>).toList().toTypedArray()
+                val map = it.value
+                val array = (map as MutableMap<*, *>).toList().toTypedArray()
 
-            // Create an ArrayAdapter to bind the items to the ListView
-            val adapter = ArrayAdapter(this@ProfileActivity, android.R.layout.simple_list_item_1, array)
+                // Create an ArrayAdapter to bind the items to the ListView
+                val adapter =
+                    ArrayAdapter(this@ProfileActivity, android.R.layout.simple_list_item_1, array)
 
-            // Set the adapter on the ListView
-            Url_list.adapter = adapter
+                // Set the adapter on the ListView
+                Url_list.adapter = adapter
 
-            println(map)
-
-        }.addOnFailureListener{
+                println(map)
+            }
+        }.addOnFailureListener {
             Log.e("firebase", "Error getting data", it)
         }
     }
-
 }
