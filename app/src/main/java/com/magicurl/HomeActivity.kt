@@ -1,12 +1,21 @@
 package com.magicurl
 
+import android.app.Activity
+import android.content.Context
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
+import android.content.res.TypedArray
 import android.os.Bundle
 import android.text.TextUtils
 import android.util.Log
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
 import android.widget.ArrayAdapter
+import android.widget.BaseAdapter
+import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ktx.database
@@ -15,11 +24,11 @@ import kotlinx.android.synthetic.main.activity_home.*
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.activity_profile.*
 import kotlinx.android.synthetic.main.activity_search.*
+import kotlinx.android.synthetic.main.home_row.view.*
 import org.json.JSONObject
 import java.io.BufferedReader
 import java.io.DataOutputStream
 import java.io.InputStreamReader
-import java.io.OutputStreamWriter
 import java.net.HttpURLConnection
 import java.net.URL
 
@@ -83,21 +92,21 @@ class HomeActivity : AppCompatActivity() {
 
 
             database.child(userId).child("urls").get().addOnSuccessListener {
-                if(it.exists()) {
-                    Log.i("firebase", "Got value ${it.value}")
+            if(it.exists()) {
+                Log.i("firebase", "Got value ${it.value}")
 
-                    val map = it.value
-                    val array = (map as MutableMap<*, *>).toList().toTypedArray().takeLast(3)
+                val map = it.value
+                val array = (map as MutableMap<*, *>).toList().toTypedArray().takeLast(3)
 
-                    // Create an ArrayAdapter to bind the items to the ListView
-                    val adapter =
-                        ArrayAdapter(this@HomeActivity, android.R.layout.simple_list_item_1, array)
+                // Create an ArrayAdapter to bind the items to the ListView
+                //val adapter =
+                    //ArrayAdapter(this@HomeActivity, android.R.layout.simple_list_item_1, array)
 
-                    // Set the adapter on the ListView
-                    list_shorted.adapter = adapter
+                // Set the adapter on the ListView
+                list_shorted.adapter = MyCustomAdapter(this, array)
 
-                    println(map)
-                }
+                println(map)
+            }
             }.addOnFailureListener {
                 Log.e("firebase", "Error getting data", it)
             }
@@ -155,6 +164,52 @@ class HomeActivity : AppCompatActivity() {
 
             et_home_name.setText("")
             et_home_url.setText("")
+            closeKeyboard(et_home_url)
+        }
+
+    }
+
+    private fun closeKeyboard(view: View){
+        val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.hideSoftInputFromWindow(view.windowToken, 0)
+    }
+
+    private class MyCustomAdapter(context: Context, array: List<Pair<*,*>>): BaseAdapter() {
+
+        private val mContext: Context
+        private val linkArray: Array<Pair<*,*>>
+
+
+        init {
+            this.mContext = context
+            this.linkArray = array.toTypedArray()
+        }
+
+
+        //responsible for the number of rows in my list
+        override fun getCount(): Int {
+            return 2
+        }
+
+        override fun getItemId(position: Int): Long {
+            return position.toLong()
+        }
+
+        override fun getItem(position: Int): Any {
+        return "TEST"
+        }
+
+
+        //responsible for rendering out each row
+        override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
+            val LayoutInflater = LayoutInflater.from(mContext)
+            val mainRow = LayoutInflater.inflate(R.layout.home_row, parent, false)
+            val namePosition = mainRow.findViewById<TextView>(R.id.name_textView)
+            val urlPosition = mainRow.findViewById<TextView>(R.id.link_textView)
+
+            namePosition.text = linkArray.get(position).first.toString().substringAfter("-")
+            urlPosition.text = linkArray.get(position).second.toString()
+            return mainRow
         }
 
     }
