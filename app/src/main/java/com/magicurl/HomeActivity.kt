@@ -31,6 +31,7 @@ import java.io.DataOutputStream
 import java.io.InputStreamReader
 import java.net.HttpURLConnection
 import java.net.URL
+import kotlin.math.max
 
 class HomeActivity : AppCompatActivity() {
     private lateinit var database: DatabaseReference
@@ -96,7 +97,9 @@ class HomeActivity : AppCompatActivity() {
                 Log.i("firebase", "Got value ${it.value}")
 
                 val map = it.value
-                val array = (map as MutableMap<*, *>).toList().toTypedArray().takeLast(3)
+                var array = (map as MutableMap<*, *>).toList().toTypedArray()
+
+                array = array.sortedWith(compareBy({it.first.toString().substringBefore("-")})).takeLast(3).reversed().toTypedArray()
 
                 // Create an ArrayAdapter to bind the items to the ListView
                 //val adapter =
@@ -105,7 +108,7 @@ class HomeActivity : AppCompatActivity() {
                 // Set the adapter on the ListView
                 list_shorted.adapter = MyCustomAdapter(this, array)
 
-                println(map)
+                println(array)
             }
             }.addOnFailureListener {
                 Log.e("firebase", "Error getting data", it)
@@ -174,7 +177,7 @@ class HomeActivity : AppCompatActivity() {
         imm.hideSoftInputFromWindow(view.windowToken, 0)
     }
 
-    private class MyCustomAdapter(context: Context, array: List<Pair<*,*>>): BaseAdapter() {
+    private class MyCustomAdapter(context: Context, array: Array<Pair<*,*>>): BaseAdapter() {
 
         private val mContext: Context
         private val linkArray: Array<Pair<*,*>>
@@ -182,13 +185,13 @@ class HomeActivity : AppCompatActivity() {
 
         init {
             this.mContext = context
-            this.linkArray = array.toTypedArray()
+            this.linkArray = array
         }
 
 
         //responsible for the number of rows in my list
         override fun getCount(): Int {
-            return 2
+            return linkArray.size
         }
 
         override fun getItemId(position: Int): Long {
