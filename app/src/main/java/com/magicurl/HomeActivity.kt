@@ -7,6 +7,7 @@ import android.content.res.TypedArray
 import android.os.Bundle
 import android.text.TextUtils
 import android.util.Log
+import android.view.FocusFinder
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -58,7 +59,9 @@ class HomeActivity : AppCompatActivity() {
         btn_short.setOnClickListener {
             // Prendere info da textbox
             when {
-                TextUtils.isEmpty(et_home_url.text.toString().trim {it <= ' '}) -> {
+                TextUtils.isEmpty(et_home_url.text.toString().trim { it <= ' ' }) or
+                        !(et_home_url.text.contains(".")) -> {
+
                     Toast.makeText(
                         this@HomeActivity,
                         "Please enter an URL!",
@@ -66,7 +69,7 @@ class HomeActivity : AppCompatActivity() {
                     ).show()
                 }
 
-                TextUtils.isEmpty(et_home_name.text.toString().trim {it <= ' '}) -> {
+                TextUtils.isEmpty(et_home_name.text.toString().trim { it <= ' ' }) -> {
                     Toast.makeText(
                         this@HomeActivity,
                         "Please enter a name for your URL!",
@@ -74,9 +77,9 @@ class HomeActivity : AppCompatActivity() {
                     ).show()
                 }
 
-                else -> {
-                    magicifyLink().start()
 
+                else -> {
+                        magicifyLink().start()
 
                 }
             }
@@ -86,38 +89,38 @@ class HomeActivity : AppCompatActivity() {
 
     }
 
-    private fun updateList(){
+    fun updateList() {
         database = Firebase.database.reference
 
         val userId = FirebaseAuth.getInstance().currentUser?.uid.toString()
 
 
-            database.child(userId).child("urls").get().addOnSuccessListener {
-            if(it.exists()) {
+        database.child(userId).child("urls").get().addOnSuccessListener {
+            if (it.exists()) {
                 Log.i("firebase", "Got value ${it.value}")
 
                 val map = it.value
                 var array = (map as MutableMap<*, *>).toList().toTypedArray()
 
-                array = array.sortedWith(compareBy({it.first.toString().substringBefore("-")})).takeLast(3).reversed().toTypedArray()
+                array = array.sortedWith(compareBy({ it.first.toString().substringBefore("-") }))
+                    .reversed().takeLast(3).toTypedArray()
 
                 // Create an ArrayAdapter to bind the items to the ListView
                 //val adapter =
-                    //ArrayAdapter(this@HomeActivity, android.R.layout.simple_list_item_1, array)
+                //ArrayAdapter(this@HomeActivity, android.R.layout.simple_list_item_1, array)
 
                 // Set the adapter on the ListView
-                list_shorted.adapter = MyCustomAdapter(this, array)
+                list_shorted.adapter = MyCustomAdapter(this, array, database)
 
                 println(array)
             }
-            }.addOnFailureListener {
-                Log.e("firebase", "Error getting data", it)
-            }
+        }.addOnFailureListener {
+            Log.e("firebase", "Error getting data", it)
+        }
 
     }
 
-    private fun magicifyLink(): Thread
-    {
+    private fun magicifyLink(): Thread {
 
         return Thread {
             val urlToShorten: String = et_home_url.text.toString().trim { it <= ' ' }
@@ -129,7 +132,8 @@ class HomeActivity : AppCompatActivity() {
 
 
             val url = URL("https://api.tinyurl.com/create")
-            val postData = "api_token=BssoQFHyATXqAqm9D78h2qhYOmSwWdWI9Jbdo3sZ4PosD8sexO3DvoDjKdHA&url=$urlToShorten"
+            val postData =
+                "api_token=BssoQFHyATXqAqm9D78h2qhYOmSwWdWI9Jbdo3sZ4PosD8sexO3DvoDjKdHA&url=$urlToShorten"
 
             val conn = url.openConnection() as HttpURLConnection
             conn.requestMethod = "POST"
@@ -172,20 +176,29 @@ class HomeActivity : AppCompatActivity() {
 
     }
 
-    private fun closeKeyboard(view: View){
+    private fun closeKeyboard(view: View) {
         val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         imm.hideSoftInputFromWindow(view.windowToken, 0)
     }
 
-    private class MyCustomAdapter(context: Context, array: Array<Pair<*,*>>): BaseAdapter() {
+
+    private class MyCustomAdapter(
+        context: Context,
+        array: Array<Pair<*, *>>,
+        database: DatabaseReference
+    ) : BaseAdapter() {
 
         private val mContext: Context
-        private val linkArray: Array<Pair<*,*>>
+        private val linkArray: Array<Pair<*, *>>
+        private val db: DatabaseReference
+        val userId = FirebaseAuth.getInstance().currentUser?.uid.toString()
 
 
         init {
             this.mContext = context
             this.linkArray = array
+            this.db = database
+
         }
 
 
@@ -199,7 +212,7 @@ class HomeActivity : AppCompatActivity() {
         }
 
         override fun getItem(position: Int): Any {
-        return "TEST"
+            return "TEST"
         }
 
 
@@ -209,11 +222,21 @@ class HomeActivity : AppCompatActivity() {
             val mainRow = LayoutInflater.inflate(R.layout.home_row, parent, false)
             val namePosition = mainRow.findViewById<TextView>(R.id.name_textView)
             val urlPosition = mainRow.findViewById<TextView>(R.id.link_textView)
+            val delete = mainRow.findViewById<TextView>(R.id.delete)
+            val modify = mainRow.findViewById<TextView>(R.id.modify)
 
             namePosition.text = linkArray.get(position).first.toString().substringAfter("-")
             urlPosition.text = linkArray.get(position).second.toString()
+            delete.setOnClickListener {
+                val deleteElement = linkArray.get(position).first.toString()
+                linkArray.drop(position)
+                db.child(userId).child("urls").child(deleteElement).removeValue()
+
+            }
+            modify.setOnClickListener {
+
+            }
             return mainRow
         }
-
     }
 }
