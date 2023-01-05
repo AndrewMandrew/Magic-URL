@@ -40,7 +40,7 @@
         app:srcCompat="@drawable/ic_search" />
 
     <EditText
-        android:id="@+id/editTextTextEmailAddress"
+        android:id="@+id/et_src_user"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="32dp"
@@ -62,23 +62,26 @@
         android:layout_height="wrap_content"
         android:background="@drawable/round_border"
         android:padding="13dp"
-        android:text="Button"
-        app:layout_constraintEnd_toEndOf="@+id/editTextTextEmailAddress"
-        app:layout_constraintTop_toTopOf="@+id/editTextTextEmailAddress" />
+        android:text="Search"
+        app:layout_constraintEnd_toEndOf="@+id/et_src_user"
+        app:layout_constraintTop_toTopOf="@+id/et_src_user" />
 
     <ListView
         android:id="@+id/user_list"
-        android:layout_width="wrap_content"
-        android:layout_height="463dp"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
         android:padding="16dp"
+        app:layout_constraintBottom_toTopOf="@+id/navigation_search"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/view" />
+        app:layout_constraintTop_toBottomOf="@+id/view"
+        app:layout_constraintVertical_bias="0.0" />
 
     <View
         android:id="@+id/navigation_search"
-        android:layout_width="0dp"
-        android:layout_height="120dp"
+        android:layout_width="414dp"
+        android:layout_height="87dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
@@ -89,7 +92,6 @@
         android:layout_height="12dp"
         android:layout_marginEnd="32dp"
         android:layout_marginStart="32dp"
-        android:layout_marginTop="34dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/navigation_search"

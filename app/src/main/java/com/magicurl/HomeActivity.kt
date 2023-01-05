@@ -1,19 +1,16 @@
 package com.magicurl
 
-import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.content.res.TypedArray
 import android.os.Bundle
 import android.text.TextUtils
 import android.util.Log
-import android.view.FocusFinder
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
-import android.widget.ArrayAdapter
 import android.widget.BaseAdapter
+import android.widget.ListView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -22,24 +19,22 @@ import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 import kotlinx.android.synthetic.main.activity_home.*
-import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.activity_profile.*
-import kotlinx.android.synthetic.main.activity_search.*
-import kotlinx.android.synthetic.main.home_row.view.*
 import org.json.JSONObject
 import java.io.BufferedReader
 import java.io.DataOutputStream
 import java.io.InputStreamReader
 import java.net.HttpURLConnection
 import java.net.URL
-import kotlin.math.max
 
 class HomeActivity : AppCompatActivity() {
     private lateinit var database: DatabaseReference
+    private lateinit var myListView : ListView
+    private lateinit var dataArray: Array<Pair<*, *>>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_home)
+        myListView = findViewById(R.id.list_shorted)
 
         home_search.setOnClickListener {
 
@@ -79,7 +74,7 @@ class HomeActivity : AppCompatActivity() {
 
 
                 else -> {
-                        magicifyLink().start()
+                    magicifyLink().start()
 
                 }
             }
@@ -102,22 +97,14 @@ class HomeActivity : AppCompatActivity() {
                 val map = it.value
                 var array = (map as MutableMap<*, *>).toList().toTypedArray()
 
-                array = array.sortedWith(compareBy({ it.first.toString().substringBefore("-") }))
+                this.dataArray = array.sortedWith(compareBy({ it.first.toString().substringBefore("-") }))
                     .reversed().takeLast(3).toTypedArray()
 
-                // Create an ArrayAdapter to bind the items to the ListView
-                //val adapter =
-                //ArrayAdapter(this@HomeActivity, android.R.layout.simple_list_item_1, array)
-
-                // Set the adapter on the ListView
-                list_shorted.adapter = MyCustomAdapter(this, array, database)
-
-                println(array)
+                myListView.adapter = MyCustomAdapter(this, database)
             }
         }.addOnFailureListener {
             Log.e("firebase", "Error getting data", it)
         }
-
     }
 
     private fun magicifyLink(): Thread {
@@ -147,31 +134,19 @@ class HomeActivity : AppCompatActivity() {
             BufferedReader(InputStreamReader(conn.inputStream)).use { br ->
                 var line: String?
                 while (br.readLine().also { line = it } != null) {
-                    // {"data":{"domain":"tinyurl.com","alias":"2tadbyva","deleted":false,"archived":false,"analytics":{"enabled":true,"public":false},"tags":[],"created_at":"2022-12-21T19:38:06+00:00","expires_at":null,"tiny_url":"https:\/\/tinyurl.com\/2tadbyva","url":"http:\/\/lol.com"},"code":0,"errors":[]}
                     println(line)
                     val tiny_url = JSONObject(line).getJSONObject("data").get("tiny_url")
 
                     val database = Firebase.database
                     val tiny_url_name = database.getReference(userId).child("urls").child(name)
                     tiny_url_name.setValue(tiny_url)
-
                 }
-
             }
-
-            /*
-            if(conn.responseCode == 200){
-                val response = conn.inputStream
-                println(response.toString())
-            }
-            else{
-                println(conn.responseCode)
-            }
-             */
 
             et_home_name.setText("")
             et_home_url.setText("")
             closeKeyboard(et_home_url)
+            updateList()
         }
 
     }
@@ -183,20 +158,17 @@ class HomeActivity : AppCompatActivity() {
 
 
     private class MyCustomAdapter(
-        context: Context,
-        array: Array<Pair<*, *>>,
+        context: HomeActivity,
         database: DatabaseReference
     ) : BaseAdapter() {
 
-        private val mContext: Context
-        private val linkArray: Array<Pair<*, *>>
+        private val mContext: HomeActivity
         private val db: DatabaseReference
         val userId = FirebaseAuth.getInstance().currentUser?.uid.toString()
 
 
         init {
             this.mContext = context
-            this.linkArray = array
             this.db = database
 
         }
@@ -204,7 +176,7 @@ class HomeActivity : AppCompatActivity() {
 
         //responsible for the number of rows in my list
         override fun getCount(): Int {
-            return linkArray.size
+            return mContext.dataArray.size
         }
 
         override fun getItemId(position: Int): Long {
@@ -215,28 +187,35 @@ class HomeActivity : AppCompatActivity() {
             return "TEST"
         }
 
-
-        //responsible for rendering out each row
         override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
             val LayoutInflater = LayoutInflater.from(mContext)
             val mainRow = LayoutInflater.inflate(R.layout.home_row, parent, false)
             val namePosition = mainRow.findViewById<TextView>(R.id.name_textView)
             val urlPosition = mainRow.findViewById<TextView>(R.id.link_textView)
-            val delete = mainRow.findViewById<TextView>(R.id.delete)
-            val modify = mainRow.findViewById<TextView>(R.id.modify)
 
-            namePosition.text = linkArray.get(position).first.toString().substringAfter("-")
-            urlPosition.text = linkArray.get(position).second.toString()
+
+            namePosition.text = mContext.dataArray.get(position).first.toString().substringAfter("-")
+            urlPosition.text = mContext.dataArray.get(position).second.toString()
+
+            setListeners(position, mainRow)
+
+            return mainRow
+        }
+
+        private fun setListeners(position:Int, mainRow:View){
+            val delete = mainRow.findViewById<TextView>(R.id.delete)
+
             delete.setOnClickListener {
-                val deleteElement = linkArray.get(position).first.toString()
-                linkArray.drop(position)
+                val deleteElement = mContext.dataArray.get(position).first.toString()
+                val newList = mContext.dataArray.toMutableList()
+
+                newList.remove(mContext.dataArray[position])
+                mContext.dataArray = newList.toTypedArray()
+
                 db.child(userId).child("urls").child(deleteElement).removeValue()
 
+                this.notifyDataSetChanged()
             }
-            modify.setOnClickListener {
-
-            }
-            return mainRow
         }
     }
 }
