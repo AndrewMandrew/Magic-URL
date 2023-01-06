@@ -8,7 +8,9 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ArrayAdapter
 import android.widget.BaseAdapter
+import android.widget.ListAdapter
 import android.widget.ListView
 import android.widget.TextView
 import android.widget.Toast
@@ -58,6 +60,10 @@ class SearchActivity : AppCompatActivity() {
 
             }
         }
+
+        user_list.setOnItemClickListener{parent, view, position, id ->
+            println(dataArray.get(position))
+        }
     }
     private fun searchUser(){
         database = Firebase.database.reference
@@ -86,63 +92,16 @@ class SearchActivity : AppCompatActivity() {
                 println(mySearchResults)
                 val array = mySearchResults.toTypedArray()
                 this.dataArray = array
-                
-                user_list.adapter = SearchActivity.MyCustomAdapter(this, database)
+
+                val arrayAdapter: ArrayAdapter<*>
+                val mListView = findViewById<ListView>(R.id.user_list)
+                arrayAdapter = ArrayAdapter(this,android.R.layout.simple_list_item_1, array)
+                mListView.adapter = arrayAdapter
             }
         }.addOnFailureListener {
             Log.e("firebase", "Error getting data", it)
         }
 
-    }
-
-    private class MyCustomAdapter(
-        context: SearchActivity,
-        database: DatabaseReference
-    ) : BaseAdapter() {
-
-        private val mContext: SearchActivity
-        private val db: DatabaseReference
-        val userId = FirebaseAuth.getInstance().currentUser?.uid.toString()
-
-
-        init {
-            this.mContext = context
-            this.db = database
-
-        }
-
-
-        //responsible for the number of rows in my list
-        override fun getCount(): Int {
-            return mContext.dataArray.size
-        }
-
-        override fun getItemId(position: Int): Long {
-            return position.toLong()
-        }
-
-        override fun getItem(position: Int): Any {
-            return "TEST"
-        }
-
-        override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
-            val LayoutInflater = LayoutInflater.from(mContext)
-            val mainRow = LayoutInflater.inflate(R.layout.home_row, parent, false)
-            val namePosition = mainRow.findViewById<TextView>(R.id.name_textView)
-
-
-            namePosition.text = mContext.dataArray.get(position).toString()
-
-
-            setListeners(position, mainRow)
-
-            return mainRow
-        }
-
-        private fun setListeners(position:Int, mainRow:View){
-            val delete = mainRow.findViewById<TextView>(R.id.delete)
-
-        }
     }
 
 

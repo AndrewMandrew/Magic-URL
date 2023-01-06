@@ -70,6 +70,7 @@
         android:id="@+id/user_list"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        android:clickable="true"
         android:padding="16dp"
         app:layout_constraintBottom_toTopOf="@+id/navigation_search"
         app:layout_constraintEnd_toEndOf="parent"
