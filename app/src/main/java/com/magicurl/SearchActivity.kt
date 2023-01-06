@@ -4,6 +4,7 @@ import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.text.TextUtils
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -20,6 +21,7 @@ import kotlinx.android.synthetic.main.activity_home.*
 import kotlinx.android.synthetic.main.activity_search.*
 
 class SearchActivity : AppCompatActivity() {
+    private lateinit var dataArray: Array<String>
     private lateinit var database: DatabaseReference
 
 
@@ -60,12 +62,87 @@ class SearchActivity : AppCompatActivity() {
     private fun searchUser(){
         database = Firebase.database.reference
 
+        val userId = FirebaseAuth.getInstance().currentUser?.uid.toString()
         val searchId = et_src_user.text.toString()
+
+        //val currentUser = database.child(userId).child("username").get().toString()
+
+        database.get().addOnSuccessListener {
+
+            val mySearchResults : MutableList<String> = mutableListOf()
+
+            if (it.exists()) {
+                Log.i("firebase", "Got value ${it.value}")
+                val results: HashMap<*, *> = it.value as HashMap<*, *>
+
+                for ((key, value) in results) {
+                    val nameFound = (value as HashMap<*, *>).get("username").toString()
+
+                    if (nameFound.contains(searchId, ignoreCase = true)){
+                        mySearchResults.add(nameFound)
+                    }
+                }
+
+                println(mySearchResults)
+                val array = mySearchResults.toTypedArray()
+                this.dataArray = array
+                
+                user_list.adapter = SearchActivity.MyCustomAdapter(this, database)
+            }
+        }.addOnFailureListener {
+            Log.e("firebase", "Error getting data", it)
+        }
+
+    }
+
+    private class MyCustomAdapter(
+        context: SearchActivity,
+        database: DatabaseReference
+    ) : BaseAdapter() {
+
+        private val mContext: SearchActivity
+        private val db: DatabaseReference
         val userId = FirebaseAuth.getInstance().currentUser?.uid.toString()
 
 
+        init {
+            this.mContext = context
+            this.db = database
+
+        }
 
 
+        //responsible for the number of rows in my list
+        override fun getCount(): Int {
+            return mContext.dataArray.size
+        }
+
+        override fun getItemId(position: Int): Long {
+            return position.toLong()
+        }
+
+        override fun getItem(position: Int): Any {
+            return "TEST"
+        }
+
+        override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
+            val LayoutInflater = LayoutInflater.from(mContext)
+            val mainRow = LayoutInflater.inflate(R.layout.home_row, parent, false)
+            val namePosition = mainRow.findViewById<TextView>(R.id.name_textView)
+
+
+            namePosition.text = mContext.dataArray.get(position).toString()
+
+
+            setListeners(position, mainRow)
+
+            return mainRow
+        }
+
+        private fun setListeners(position:Int, mainRow:View){
+            val delete = mainRow.findViewById<TextView>(R.id.delete)
+
+        }
     }
 
 
