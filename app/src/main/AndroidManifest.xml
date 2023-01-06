@@ -15,6 +15,15 @@
         android:theme="@style/Theme.MagicURL"
         tools:targetApi="31">
         <activity
+            android:name=".OtherUsersProfileActivity"
+            android:exported="false"
+            android:theme="@style/Theme.MagicURL.NoActionBar"
+            android:windowSoftInputMode="adjustPan">
+            <meta-data
+                android:name="android.app.lib_name"
+                android:value="" />
+        </activity>
+        <activity
             android:name=".ProfileActivity"
             android:exported="false"
             android:theme="@style/Theme.MagicURL.NoActionBar"
@@ -35,7 +44,6 @@
         <activity
             android:name=".FavouriteActivity"
             android:exported="false"
-
             android:theme="@style/Theme.MagicURL.NoActionBar"
             android:windowSoftInputMode="adjustPan">
             <meta-data
@@ -54,24 +62,24 @@
         </activity>
         <activity
             android:name=".ForgotPasswordActivity"
-            android:theme="@style/Theme.MagicURL.NoActionBar"
-            android:exported="false">
+            android:exported="false"
+            android:theme="@style/Theme.MagicURL.NoActionBar">
             <meta-data
                 android:name="android.app.lib_name"
                 android:value="" />
         </activity>
         <activity
             android:name=".RegisterActivity"
-            android:theme="@style/Theme.MagicURL.NoActionBar"
-            android:exported="true">
+            android:exported="true"
+            android:theme="@style/Theme.MagicURL.NoActionBar">
             <meta-data
                 android:name="android.app.lib_name"
                 android:value="" />
         </activity>
         <activity
             android:name=".LoginActivity"
-            android:theme="@style/Theme.MagicURL.NoActionBar"
-            android:exported="true">
+            android:exported="true"
+            android:theme="@style/Theme.MagicURL.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

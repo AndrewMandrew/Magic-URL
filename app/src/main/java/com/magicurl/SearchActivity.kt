@@ -62,7 +62,15 @@ class SearchActivity : AppCompatActivity() {
         }
 
         user_list.setOnItemClickListener{parent, view, position, id ->
-            println(dataArray.get(position))
+            val intent =
+                Intent(this@SearchActivity, OtherUsersProfileActivity::class.java)
+            intent.flags =
+                Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            intent.putExtra("user_name", dataArray.get(position))
+            startActivity(intent)
+            finish()
+
+
         }
     }
     private fun searchUser(){
