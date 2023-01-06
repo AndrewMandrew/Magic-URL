@@ -8,6 +8,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
+import android.widget.ImageView
 import android.widget.ListView
 import android.widget.TextView
 import com.google.firebase.auth.FirebaseAuth
@@ -26,6 +27,7 @@ class FavouriteActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_favourite)
+        myListView = findViewById(R.id.list_fav)
 
         fav_home.setOnClickListener {
 
@@ -45,7 +47,6 @@ class FavouriteActivity : AppCompatActivity() {
 
         val userId = FirebaseAuth.getInstance().currentUser?.uid.toString()
 
-
         database.child(userId).child("favourites").get().addOnSuccessListener {
             if (it.exists()) {
                 Log.i("firebase", "Got value ${it.value}")
@@ -61,6 +62,7 @@ class FavouriteActivity : AppCompatActivity() {
         }.addOnFailureListener {
             Log.e("firebase", "Error getting data", it)
         }
+
 
     }
     private class MyCustomAdapter(
@@ -95,9 +97,9 @@ class FavouriteActivity : AppCompatActivity() {
 
         override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
             val LayoutInflater = LayoutInflater.from(mContext)
-            val mainRow = LayoutInflater.inflate(R.layout.fav_row, parent, false)
-            val namePosition = mainRow.findViewById<TextView>(R.id.name_textView)
-            val urlPosition = mainRow.findViewById<TextView>(R.id.link_textView)
+            val mainRow = LayoutInflater.inflate(R.layout.user_links, parent, false)
+            val namePosition = mainRow.findViewById<TextView>(R.id.name_other_textView)
+            val urlPosition = mainRow.findViewById<TextView>(R.id.link_other_textView)
 
 
             namePosition.text = mContext.dataArray.get(position).first.toString().substringAfter("-")
@@ -108,8 +110,8 @@ class FavouriteActivity : AppCompatActivity() {
             return mainRow
         }
 
-        private fun setListeners(position:Int, mainRow: View){
-            val delete = mainRow.findViewById<TextView>(R.id.delete)
+        private fun setListeners(position:Int, mainRow:View){
+            val delete = mainRow.findViewById<ImageView>(R.id.favourite)
 
             delete.setOnClickListener {
                 val deleteElement = mContext.dataArray.get(position).first.toString()
@@ -118,10 +120,11 @@ class FavouriteActivity : AppCompatActivity() {
                 newList.remove(mContext.dataArray[position])
                 mContext.dataArray = newList.toTypedArray()
 
-                db.child(userId).child("urls").child(deleteElement).removeValue()
+                db.child(userId).child("favourites").child(deleteElement).removeValue()
 
                 this.notifyDataSetChanged()
             }
+
         }
     }
 
