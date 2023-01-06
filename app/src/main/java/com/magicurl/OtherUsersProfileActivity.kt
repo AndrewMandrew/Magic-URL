@@ -10,6 +10,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.BaseAdapter
+import android.widget.Button
+import android.widget.ImageView
 import android.widget.ListView
 import android.widget.TextView
 import com.google.firebase.auth.FirebaseAuth
@@ -152,7 +154,15 @@ class OtherUsersProfileActivity : AppCompatActivity() {
 
         private fun setListeners(position:Int, mainRow:View){
 
+            val favouritePosition = mainRow.findViewById<ImageView>(R.id.favourite)
+            favouritePosition.setOnClickListener {
 
+                val fav = mContext.dataArray.get(position)
+
+                val database = Firebase.database
+                val tiny_url_name = database.getReference(userId).child("favourites").child(fav.first.toString())
+                tiny_url_name.setValue(fav.second.toString())
+            }
         }
     }
 }
