@@ -76,7 +76,7 @@ class RegisterActivity : AppCompatActivity() {
                                     intent.putExtra("email_id", email)
 
                                     val userId = firebaseUser.uid
-                                    val username = et_register_email.text.toString().substringBefore('@')
+                                    val username = et_register_email.text.toString()
                                     val database = Firebase.database
                                     val reference = database.getReference(userId).child("username")
                                     reference.setValue(username)
