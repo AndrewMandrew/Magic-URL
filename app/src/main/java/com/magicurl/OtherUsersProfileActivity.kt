@@ -22,10 +22,13 @@ import kotlinx.android.synthetic.main.activity_search.*
 
 class OtherUsersProfileActivity : AppCompatActivity() {
     private lateinit var database: DatabaseReference
+    private lateinit var myListView : ListView
+    private lateinit var dataArray: Array<Pair<*, *>>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_other_users_profile)
+        myListView = findViewById(R.id.other_user_list)
 
 
         other_home.setOnClickListener {
@@ -57,13 +60,10 @@ class OtherUsersProfileActivity : AppCompatActivity() {
         database = Firebase.database.reference
 
         val userId = FirebaseAuth.getInstance().currentUser?.uid.toString()
-
         //val currentUser = database.child(userId).child("username").get().toString()
 
         database.get().addOnSuccessListener {
-
             var foundKey = "/"
-
             if (it.exists()) {
                 Log.i("firebase", "Got value ${it.value}")
                 val results: HashMap<*, *> = it.value as HashMap<*, *>
@@ -73,25 +73,26 @@ class OtherUsersProfileActivity : AppCompatActivity() {
 
                     if (nameFound.equals(searchId, ignoreCase = true)){
                         foundKey = key.toString()
+
                     }
                 }
 
-                database.child(foundKey).get().addOnSuccessListener {
-                    val map = it.value
-                    val array = (map as MutableMap<*, *>).toList().toTypedArray()
 
-                    // Create an ArrayAdapter to bind the items to the ListView
-                    val adapter =
-                        ArrayAdapter(this@OtherUsersProfileActivity, android.R.layout.simple_list_item_1, array)
+                database.child(foundKey).child("urls").get().addOnSuccessListener {
+                    if (it.exists()) {
+                        Log.i("firebase", "Got value ${it.value}")
 
-                    // Set the adapter on the ListView
-                    Url_list.adapter = OtherUsersProfileActivity.MyCustomAdapter(this, array, database)
+                        val map = it.value
+                        val array = (map as MutableMap<*, *>).toList().toTypedArray()
 
-                    println(map)
+                        this.dataArray = array.sortedWith(compareBy({ it.first.toString().substringBefore("-") }))
+                            .reversed().toTypedArray()
+
+                        myListView.adapter = OtherUsersProfileActivity.MyCustomAdapter(this, database)
+                    }
+                }.addOnFailureListener {
+                    Log.e("firebase", "Error getting data", it)
                 }
-
-                //println(urls)
-                //val array = (urls as MutableMap<*, *>).toList().toTypedArray()
 
 
             }
@@ -99,23 +100,23 @@ class OtherUsersProfileActivity : AppCompatActivity() {
             Log.e("firebase", "Error getting data", it)
         }
 
+
+
+
     }
 
     private class MyCustomAdapter(
-        context: Context,
-        array: Array<Pair<*, *>>,
+        context: OtherUsersProfileActivity,
         database: DatabaseReference
     ) : BaseAdapter() {
 
-        private val mContext: Context
-        private val linkArray: Array<Pair<*, *>>
+        private val mContext: OtherUsersProfileActivity
         private val db: DatabaseReference
         val userId = FirebaseAuth.getInstance().currentUser?.uid.toString()
 
 
         init {
             this.mContext = context
-            this.linkArray = array
             this.db = database
 
         }
@@ -123,7 +124,7 @@ class OtherUsersProfileActivity : AppCompatActivity() {
 
         //responsible for the number of rows in my list
         override fun getCount(): Int {
-            return linkArray.size
+            return mContext.dataArray.size
         }
 
         override fun getItemId(position: Int): Long {
@@ -134,28 +135,24 @@ class OtherUsersProfileActivity : AppCompatActivity() {
             return "TEST"
         }
 
-
-        //responsible for rendering out each row
         override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
             val LayoutInflater = LayoutInflater.from(mContext)
             val mainRow = LayoutInflater.inflate(R.layout.user_links, parent, false)
-            val namePosition = mainRow.findViewById<TextView>(R.id.name_textView)
-            val urlPosition = mainRow.findViewById<TextView>(R.id.link_textView)
-            val delete = mainRow.findViewById<TextView>(R.id.delete)
-            val modify = mainRow.findViewById<TextView>(R.id.modify)
+            val namePosition = mainRow.findViewById<TextView>(R.id.name_other_textView)
+            val urlPosition = mainRow.findViewById<TextView>(R.id.link_other_textView)
 
-            namePosition.text = linkArray.get(position).first.toString().substringAfter("-")
-            urlPosition.text = linkArray.get(position).second.toString()
-            delete.setOnClickListener {
-                val deleteElement = linkArray.get(position).first.toString()
-                linkArray.drop(position)
-                db.child(userId).child("urls").child(deleteElement).removeValue()
 
-            }
-            modify.setOnClickListener {
+            namePosition.text = mContext.dataArray.get(position).first.toString().substringAfter("-")
+            urlPosition.text = mContext.dataArray.get(position).second.toString()
 
-            }
+            setListeners(position, mainRow)
+
             return mainRow
+        }
+
+        private fun setListeners(position:Int, mainRow:View){
+
+
         }
     }
 }
