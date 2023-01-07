@@ -21,6 +21,7 @@ import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 import kotlinx.android.synthetic.main.activity_home.*
+import kotlinx.coroutines.awaitAll
 import org.json.JSONObject
 import java.io.BufferedReader
 import java.io.DataOutputStream
@@ -178,6 +179,9 @@ class HomeActivity : AppCompatActivity() {
             this.notifyDataSetChanged()
         }
 
+        fun updateList(){
+            this.notifyDataSetChanged()
+        }
 
         //responsible for the number of rows in my list
         override fun getCount(): Int {
@@ -204,6 +208,7 @@ class HomeActivity : AppCompatActivity() {
 
             setListeners(position, mainRow, namePosition)
 
+
             return mainRow
         }
 
@@ -212,15 +217,29 @@ class HomeActivity : AppCompatActivity() {
             val modify = mainRow.findViewById<TextView>(R.id.modify)
 
             delete.setOnClickListener {
-                val deleteElement = mContext.dataArray.get(position).first.toString()
-                val newList = mContext.dataArray.toMutableList()
+                val builder = AlertDialog.Builder(mContext)
 
-                newList.remove(mContext.dataArray[position])
-                mContext.dataArray = newList.toTypedArray()
 
-                db.child(userId).child("urls").child(deleteElement).removeValue()
+                with(builder){
+                    setTitle("Are you sure you want to delete this URL?")
+                    setPositiveButton("Ok"){ dialog, which->
 
-                this.notifyDataSetChanged()
+                        val deleteElement = mContext.dataArray.get(position).first.toString()
+                        val newList = mContext.dataArray.toMutableList()
+
+                        newList.remove(mContext.dataArray[position])
+                        mContext.dataArray = newList.toTypedArray()
+
+                        db.child(userId).child("urls").child(deleteElement).removeValue()
+                        updateList()
+                    }
+                    setNegativeButton("Cancel"){dialog, which ->
+                        Log.d("Main", "Negative button clicked.")
+                    }
+                    show()
+
+                }
+
             }
 
             modify.setOnClickListener {
