@@ -10,9 +10,11 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import android.widget.BaseAdapter
+import android.widget.EditText
 import android.widget.ListView
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DatabaseReference
@@ -197,13 +199,14 @@ class HomeActivity : AppCompatActivity() {
             namePosition.text = mContext.dataArray.get(position).first.toString().substringAfter("-")
             urlPosition.text = mContext.dataArray.get(position).second.toString()
 
-            setListeners(position, mainRow)
+            setListeners(position, mainRow, namePosition)
 
             return mainRow
         }
 
-        private fun setListeners(position:Int, mainRow:View){
+        private fun setListeners(position:Int, mainRow:View, namePosition:TextView){
             val delete = mainRow.findViewById<TextView>(R.id.delete)
+            val modify = mainRow.findViewById<TextView>(R.id.modify)
 
             delete.setOnClickListener {
                 val deleteElement = mContext.dataArray.get(position).first.toString()
@@ -216,6 +219,54 @@ class HomeActivity : AppCompatActivity() {
 
                 this.notifyDataSetChanged()
             }
+
+            modify.setOnClickListener {
+                var modifyElement = mContext.dataArray.get(position)
+
+                val builder = AlertDialog.Builder(mContext)
+                val LayoutInflater = LayoutInflater.from(mContext)
+                val dialogLayout = LayoutInflater.inflate(R.layout.popup_edit_text, null)
+                val editText = dialogLayout.findViewById<EditText>(R.id.edit_url)
+
+                var modifiedName:String
+
+
+                with(builder){
+                    setTitle("Insert new name")
+                    setPositiveButton("Ok"){ dialog, which->
+                        modifiedName = editText.text.toString()
+                        modifiedName = modifyElement.first.toString().substringBefore("-") + "-" + modifiedName
+
+                        db.child(userId).child("urls").child(modifyElement.first.toString()).removeValue()
+
+                        modifyElement = Pair(modifiedName, modifyElement.second.toString())
+
+
+                        val tiny_url_name = db.child(userId).child("urls").child(modifyElement.first.toString())
+                        tiny_url_name.setValue(modifyElement.second.toString())
+
+                        val modifiedList = mContext.dataArray.toMutableList()
+
+                        modifiedList.remove(mContext.dataArray[position])
+                        modifiedList.add(modifyElement)
+
+                        mContext.dataArray = modifiedList.sortedWith(compareBy({ it.first.toString().substringBefore("-") }))
+                            .reversed().takeLast(3).toTypedArray()
+
+                        namePosition.text = editText.text.toString()
+
+
+                    }
+                    setNegativeButton("Cancel"){dialog, which ->
+                        Log.d("Main", "Negative button clicked.")
+                    }
+                    setView(dialogLayout)
+                    show()
+
+                }
+            }
+
+
         }
     }
 }
