@@ -10,15 +10,18 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import android.widget.BaseAdapter
+import android.widget.EditText
 import android.widget.ListView
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 import kotlinx.android.synthetic.main.activity_home.*
+import kotlinx.coroutines.awaitAll
 import org.json.JSONObject
 import java.io.BufferedReader
 import java.io.DataOutputStream
@@ -64,14 +67,14 @@ class HomeActivity : AppCompatActivity() {
                     ).show()
                 }
 
-                TextUtils.isEmpty(et_home_name.text.toString().trim { it <= ' ' }) -> {
+                TextUtils.isEmpty(et_home_name.text.toString().trim { it <= ' ' }) or
+                        (et_home_name.text.toString().length > 20)-> {
                     Toast.makeText(
                         this@HomeActivity,
                         "Please enter a name for your URL!",
                         Toast.LENGTH_SHORT
                     ).show()
                 }
-
 
                 else -> {
                     magicifyLink().start()
@@ -84,7 +87,7 @@ class HomeActivity : AppCompatActivity() {
 
     }
 
-    fun updateList() {
+    private fun updateList() {
         database = Firebase.database.reference
 
         val userId = FirebaseAuth.getInstance().currentUser?.uid.toString()
@@ -97,8 +100,7 @@ class HomeActivity : AppCompatActivity() {
                 val map = it.value
                 var array = (map as MutableMap<*, *>).toList().toTypedArray()
 
-                this.dataArray = array.sortedWith(compareBy({ it.first.toString().substringBefore("-") }))
-                    .reversed().takeLast(3).toTypedArray()
+                this.dataArray = array.sortedWith(compareBy({ it.first.toString().substringBefore("-") })).takeLast(3).reversed().toTypedArray()
 
                 myListView.adapter = MyCustomAdapter(this, database)
             }
@@ -173,6 +175,9 @@ class HomeActivity : AppCompatActivity() {
 
         }
 
+        fun updateList() {
+            this.notifyDataSetChanged()
+        }
 
         //responsible for the number of rows in my list
         override fun getCount(): Int {
@@ -191,7 +196,7 @@ class HomeActivity : AppCompatActivity() {
             val LayoutInflater = LayoutInflater.from(mContext)
             val mainRow = LayoutInflater.inflate(R.layout.home_row, parent, false)
             val namePosition = mainRow.findViewById<TextView>(R.id.name_textView)
-            val urlPosition = mainRow.findViewById<TextView>(R.id.link_textView)
+            val urlPosition = mainRow.findViewById<TextView>(R.id.link_other_textView)
 
 
             namePosition.text = mContext.dataArray.get(position).first.toString().substringAfter("-")
@@ -199,23 +204,87 @@ class HomeActivity : AppCompatActivity() {
 
             setListeners(position, mainRow)
 
+
             return mainRow
         }
 
         private fun setListeners(position:Int, mainRow:View){
             val delete = mainRow.findViewById<TextView>(R.id.delete)
+            val modify = mainRow.findViewById<TextView>(R.id.modify)
 
             delete.setOnClickListener {
-                val deleteElement = mContext.dataArray.get(position).first.toString()
-                val newList = mContext.dataArray.toMutableList()
+                val builder = AlertDialog.Builder(mContext)
 
-                newList.remove(mContext.dataArray[position])
-                mContext.dataArray = newList.toTypedArray()
 
-                db.child(userId).child("urls").child(deleteElement).removeValue()
+                with(builder){
+                    setTitle("Are you sure you want to delete this URL?")
+                    setPositiveButton("Ok"){ dialog, which->
 
-                this.notifyDataSetChanged()
+                        val deleteElement = mContext.dataArray.get(position).first.toString()
+                        val newList = mContext.dataArray.toMutableList()
+
+                        newList.remove(mContext.dataArray[position])
+                        mContext.dataArray = newList.toTypedArray()
+
+                        db.child(userId).child("urls").child(deleteElement).removeValue()
+                        updateList()
+                    }
+                    setNegativeButton("Cancel"){dialog, which ->
+                        Log.d("Main", "Negative button clicked.")
+                    }
+                    show()
+
+                }
+
             }
+
+            modify.setOnClickListener {
+                var modifyElement = mContext.dataArray.get(position)
+
+                val builder = AlertDialog.Builder(mContext)
+                val LayoutInflater = LayoutInflater.from(mContext)
+                val dialogLayout = LayoutInflater.inflate(R.layout.popup_edit_text, null)
+                val editText = dialogLayout.findViewById<EditText>(R.id.edit_url)
+
+                var modifiedName:String
+
+
+                with(builder){
+                    setTitle("Insert new name")
+                    setPositiveButton("Ok"){ dialog, which->
+                        modifiedName = editText.text.toString()
+                        modifiedName = modifyElement.first.toString().substringBefore("-") + "-" + modifiedName
+
+                        db.child(userId).child("urls").child(modifyElement.first.toString()).removeValue()
+
+                        modifyElement = Pair(modifiedName, modifyElement.second.toString())
+
+
+                        val tiny_url_name = db.child(userId).child("urls").child(modifyElement.first.toString())
+                        tiny_url_name.setValue(modifyElement.second.toString())
+
+                        val modifiedList = mContext.dataArray.toMutableList()
+
+                        modifiedList.remove(mContext.dataArray[position])
+                        modifiedList.add(modifyElement)
+
+                        mContext.dataArray = modifiedList.sortedWith(compareBy({ it.first.toString().substringBefore("-") }))
+                            .takeLast(3).reversed().toTypedArray()
+
+                        updateList()
+
+
+                    }
+                    setNegativeButton("Cancel"){dialog, which ->
+                        Log.d("Main", "Negative button clicked.")
+                    }
+                    setView(dialogLayout)
+                    show()
+
+                }
+            }
+
+
         }
     }
 }

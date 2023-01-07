@@ -8,6 +8,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth
@@ -20,10 +21,13 @@ import kotlinx.android.synthetic.main.activity_profile.*
 
 class ProfileActivity : AppCompatActivity() {
     private lateinit var database: DatabaseReference
+    private lateinit var myListView : ListView
+    private lateinit var dataArray: Array<Pair<*, *>>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_profile)
+        myListView = findViewById(R.id.Url_list)
 
         profile_home.setOnClickListener {
 
@@ -71,8 +75,11 @@ class ProfileActivity : AppCompatActivity() {
                 val adapter =
                     ArrayAdapter(this@ProfileActivity, android.R.layout.simple_list_item_1, array)
 
+                this.dataArray = array.sortedWith(compareBy({ it.first.toString().substringBefore("-") }))
+                    .reversed().toTypedArray()
+
                 // Set the adapter on the ListView
-                Url_list.adapter = MyCustomAdapter(this, array, database)
+                myListView.adapter = MyCustomAdapter(this, database)
 
                 println(map)
             }
@@ -82,28 +89,28 @@ class ProfileActivity : AppCompatActivity() {
     }
 
     private class MyCustomAdapter(
-        context: Context,
-        array: Array<Pair<*, *>>,
+        context: ProfileActivity,
         database: DatabaseReference
     ) : BaseAdapter() {
 
-        private val mContext: Context
-        private val linkArray: Array<Pair<*, *>>
+        private val mContext: ProfileActivity
         private val db: DatabaseReference
         val userId = FirebaseAuth.getInstance().currentUser?.uid.toString()
 
 
         init {
             this.mContext = context
-            this.linkArray = array
             this.db = database
 
         }
 
+        fun updateList() {
+            this.notifyDataSetChanged()
+        }
 
         //responsible for the number of rows in my list
         override fun getCount(): Int {
-            return linkArray.size
+            return mContext.dataArray.size
         }
 
         override fun getItemId(position: Int): Long {
@@ -114,28 +121,98 @@ class ProfileActivity : AppCompatActivity() {
             return "TEST"
         }
 
-
-        //responsible for rendering out each row
         override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
             val LayoutInflater = LayoutInflater.from(mContext)
             val mainRow = LayoutInflater.inflate(R.layout.home_row, parent, false)
             val namePosition = mainRow.findViewById<TextView>(R.id.name_textView)
-            val urlPosition = mainRow.findViewById<TextView>(R.id.link_textView)
+            val urlPosition = mainRow.findViewById<TextView>(R.id.link_other_textView)
+
+
+            namePosition.text = mContext.dataArray.get(position).first.toString().substringAfter("-")
+            urlPosition.text = mContext.dataArray.get(position).second.toString()
+
+            setListeners(position, mainRow)
+
+            return mainRow
+        }
+
+        private fun setListeners(position:Int, mainRow:View){
             val delete = mainRow.findViewById<TextView>(R.id.delete)
             val modify = mainRow.findViewById<TextView>(R.id.modify)
 
-            namePosition.text = linkArray.get(position).first.toString().substringAfter("-")
-            urlPosition.text = linkArray.get(position).second.toString()
             delete.setOnClickListener {
-                val deleteElement = linkArray.get(position).first.toString()
-                linkArray.drop(position)
-                db.child(userId).child("urls").child(deleteElement).removeValue()
+                val builder = AlertDialog.Builder(mContext)
+
+
+                with(builder){
+                    setTitle("Are you sure you want to delete this URL?")
+                    setPositiveButton("Ok"){ dialog, which->
+
+                        val deleteElement = mContext.dataArray.get(position).first.toString()
+                        val newList = mContext.dataArray.toMutableList()
+
+                        newList.remove(mContext.dataArray[position])
+                        mContext.dataArray = newList.toTypedArray()
+
+                        db.child(userId).child("urls").child(deleteElement).removeValue()
+                        updateList()
+                    }
+                    setNegativeButton("Cancel"){dialog, which ->
+                        Log.d("Main", "Negative button clicked.")
+                    }
+                    show()
+
+                }
 
             }
+
             modify.setOnClickListener {
+                var modifyElement = mContext.dataArray.get(position)
 
+                val builder = AlertDialog.Builder(mContext)
+                val LayoutInflater = LayoutInflater.from(mContext)
+                val dialogLayout = LayoutInflater.inflate(R.layout.popup_edit_text, null)
+                val editText = dialogLayout.findViewById<EditText>(R.id.edit_url)
+
+                var modifiedName:String
+
+
+                with(builder){
+                    setTitle("Insert new name")
+                    setPositiveButton("Ok"){ dialog, which->
+                        modifiedName = editText.text.toString()
+                        modifiedName = modifyElement.first.toString().substringBefore("-") + "-" + modifiedName
+
+                        db.child(userId).child("urls").child(modifyElement.first.toString()).removeValue()
+
+                        modifyElement = Pair(modifiedName, modifyElement.second.toString())
+
+
+                        val tiny_url_name = db.child(userId).child("urls").child(modifyElement.first.toString())
+                        tiny_url_name.setValue(modifyElement.second.toString())
+
+                        val modifiedList = mContext.dataArray.toMutableList()
+
+                        modifiedList.remove(mContext.dataArray[position])
+                        modifiedList.add(modifyElement)
+
+                        mContext.dataArray = modifiedList.sortedWith(compareBy({ it.first.toString().substringBefore("-") }))
+                            .reversed().toTypedArray()
+
+                        updateList()
+
+
+                    }
+                    setNegativeButton("Cancel"){dialog, which ->
+                        Log.d("Main", "Negative button clicked.")
+                    }
+                    setView(dialogLayout)
+                    show()
+
+                }
             }
-            return mainRow
+
+
         }
     }
 }

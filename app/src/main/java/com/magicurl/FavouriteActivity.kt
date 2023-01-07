@@ -100,7 +100,8 @@ class FavouriteActivity : AppCompatActivity() {
             val mainRow = LayoutInflater.inflate(R.layout.user_links, parent, false)
             val namePosition = mainRow.findViewById<TextView>(R.id.name_other_textView)
             val urlPosition = mainRow.findViewById<TextView>(R.id.link_other_textView)
-
+            val myImage = mainRow.findViewById<ImageView>(R.id.favourite)
+            myImage.setImageResource(R.drawable.ic_star_yellow)
 
             namePosition.text = mContext.dataArray.get(position).first.toString().substringAfter("-")
             urlPosition.text = mContext.dataArray.get(position).second.toString()
