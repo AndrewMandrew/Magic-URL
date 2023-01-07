@@ -9,7 +9,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
-import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import com.google.firebase.database.ktx.database
@@ -120,7 +119,7 @@ class ProfileActivity : AppCompatActivity() {
             val LayoutInflater = LayoutInflater.from(mContext)
             val mainRow = LayoutInflater.inflate(R.layout.home_row, parent, false)
             val namePosition = mainRow.findViewById<TextView>(R.id.name_textView)
-            val urlPosition = mainRow.findViewById<TextView>(R.id.link_textView)
+            val urlPosition = mainRow.findViewById<TextView>(R.id.link_other_textView)
             val delete = mainRow.findViewById<TextView>(R.id.delete)
             val modify = mainRow.findViewById<TextView>(R.id.modify)
 

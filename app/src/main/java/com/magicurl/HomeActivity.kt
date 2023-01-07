@@ -191,7 +191,7 @@ class HomeActivity : AppCompatActivity() {
             val LayoutInflater = LayoutInflater.from(mContext)
             val mainRow = LayoutInflater.inflate(R.layout.home_row, parent, false)
             val namePosition = mainRow.findViewById<TextView>(R.id.name_textView)
-            val urlPosition = mainRow.findViewById<TextView>(R.id.link_textView)
+            val urlPosition = mainRow.findViewById<TextView>(R.id.link_other_textView)
 
 
             namePosition.text = mContext.dataArray.get(position).first.toString().substringAfter("-")

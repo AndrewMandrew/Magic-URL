@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.service.controls.Control
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -21,11 +22,14 @@ import com.google.firebase.ktx.Firebase
 import kotlinx.android.synthetic.main.activity_other_users_profile.*
 import kotlinx.android.synthetic.main.activity_profile.*
 import kotlinx.android.synthetic.main.activity_search.*
+import kotlinx.android.synthetic.main.user_links.*
 
 class OtherUsersProfileActivity : AppCompatActivity() {
     private lateinit var database: DatabaseReference
     private lateinit var myListView : ListView
     private lateinit var dataArray: Array<Pair<*, *>>
+    private lateinit var myDataArray: Array<Pair<*, *>>
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -60,9 +64,26 @@ class OtherUsersProfileActivity : AppCompatActivity() {
 
     private fun userLinks(searchId: String){
         database = Firebase.database.reference
+        var skipControl = false
 
         val userId = FirebaseAuth.getInstance().currentUser?.uid.toString()
         //val currentUser = database.child(userId).child("username").get().toString()
+
+        database.child(userId).child("favourites").get().addOnSuccessListener {
+            if (it.exists()) {
+                Log.i("firebase", "Got value ${it.value}")
+
+                val map = it.value
+                var array = (map as MutableMap<*, *>).toList().toTypedArray()
+
+                this.myDataArray = array.sortedWith(compareBy({ it.first.toString().substringBefore("-") }))
+                    .reversed().toTypedArray()
+
+                skipControl = true
+            }
+        }.addOnFailureListener {
+            Log.e("firebase", "Error getting data", it)
+        }
 
         database.get().addOnSuccessListener {
             var foundKey = "/"
@@ -90,8 +111,9 @@ class OtherUsersProfileActivity : AppCompatActivity() {
                         this.dataArray = array.sortedWith(compareBy({ it.first.toString().substringBefore("-") }))
                             .reversed().toTypedArray()
 
-                        myListView.adapter = OtherUsersProfileActivity.MyCustomAdapter(this, database)
+                        myListView.adapter = OtherUsersProfileActivity.MyCustomAdapter(this, database, skipControl)
                     }
+
                 }.addOnFailureListener {
                     Log.e("firebase", "Error getting data", it)
                 }
@@ -103,24 +125,24 @@ class OtherUsersProfileActivity : AppCompatActivity() {
         }
 
 
-
-
     }
 
     private class MyCustomAdapter(
         context: OtherUsersProfileActivity,
-        database: DatabaseReference
+        database: DatabaseReference,
+        skipControl: Boolean
     ) : BaseAdapter() {
 
         private val mContext: OtherUsersProfileActivity
         private val db: DatabaseReference
         val userId = FirebaseAuth.getInstance().currentUser?.uid.toString()
+        val skip: Boolean
 
 
         init {
             this.mContext = context
             this.db = database
-
+            this.skip = skipControl
         }
 
 
@@ -142,10 +164,25 @@ class OtherUsersProfileActivity : AppCompatActivity() {
             val mainRow = LayoutInflater.inflate(R.layout.user_links, parent, false)
             val namePosition = mainRow.findViewById<TextView>(R.id.name_other_textView)
             val urlPosition = mainRow.findViewById<TextView>(R.id.link_other_textView)
-
+            val myImage = mainRow.findViewById<ImageView>(R.id.favourite)
 
             namePosition.text = mContext.dataArray.get(position).first.toString().substringAfter("-")
             urlPosition.text = mContext.dataArray.get(position).second.toString()
+
+            var indexI = 0
+            var indexJ = 0
+            if(skip){
+                for( i in mContext.dataArray){
+                    for( j in mContext.myDataArray){
+                        if(mContext.dataArray.get(indexI).first.toString() == mContext.myDataArray.get(indexJ).first.toString()){
+
+                           myImage.setImageResource(R.drawable.ic_star_yellow)
+                            indexJ++
+                        }
+                        indexI++
+                    }
+                }
+            }
 
             setListeners(position, mainRow)
 
