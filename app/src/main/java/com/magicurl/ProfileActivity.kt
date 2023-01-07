@@ -197,7 +197,7 @@ class ProfileActivity : AppCompatActivity() {
                         modifiedList.add(modifyElement)
 
                         mContext.dataArray = modifiedList.sortedWith(compareBy({ it.first.toString().substringBefore("-") }))
-                            .reversed().takeLast(3).toTypedArray()
+                            .reversed().toTypedArray()
 
                         updateList()
 

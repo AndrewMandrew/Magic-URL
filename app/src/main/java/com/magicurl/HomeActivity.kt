@@ -67,14 +67,14 @@ class HomeActivity : AppCompatActivity() {
                     ).show()
                 }
 
-                TextUtils.isEmpty(et_home_name.text.toString().trim { it <= ' ' }) -> {
+                TextUtils.isEmpty(et_home_name.text.toString().trim { it <= ' ' }) or
+                        (et_home_name.text.toString().length > 20)-> {
                     Toast.makeText(
                         this@HomeActivity,
                         "Please enter a name for your URL!",
                         Toast.LENGTH_SHORT
                     ).show()
                 }
-
 
                 else -> {
                     magicifyLink().start()
@@ -87,7 +87,7 @@ class HomeActivity : AppCompatActivity() {
 
     }
 
-    fun updateList() {
+    private fun updateList() {
         database = Firebase.database.reference
 
         val userId = FirebaseAuth.getInstance().currentUser?.uid.toString()
@@ -100,8 +100,7 @@ class HomeActivity : AppCompatActivity() {
                 val map = it.value
                 var array = (map as MutableMap<*, *>).toList().toTypedArray()
 
-                this.dataArray = array.sortedWith(compareBy({ it.first.toString().substringBefore("-") }))
-                    .reversed().takeLast(3).toTypedArray()
+                this.dataArray = array.sortedWith(compareBy({ it.first.toString().substringBefore("-") })).takeLast(3).reversed().toTypedArray()
 
                 myListView.adapter = MyCustomAdapter(this, database)
             }
@@ -270,7 +269,7 @@ class HomeActivity : AppCompatActivity() {
                         modifiedList.add(modifyElement)
 
                         mContext.dataArray = modifiedList.sortedWith(compareBy({ it.first.toString().substringBefore("-") }))
-                            .reversed().takeLast(3).toTypedArray()
+                            .takeLast(3).reversed().toTypedArray()
 
                         updateList()
 
