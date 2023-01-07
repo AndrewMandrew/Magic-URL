@@ -203,13 +203,13 @@ class HomeActivity : AppCompatActivity() {
             namePosition.text = mContext.dataArray.get(position).first.toString().substringAfter("-")
             urlPosition.text = mContext.dataArray.get(position).second.toString()
 
-            setListeners(position, mainRow, namePosition)
+            setListeners(position, mainRow)
 
 
             return mainRow
         }
 
-        private fun setListeners(position:Int, mainRow:View, namePosition:TextView){
+        private fun setListeners(position:Int, mainRow:View){
             val delete = mainRow.findViewById<TextView>(R.id.delete)
             val modify = mainRow.findViewById<TextView>(R.id.modify)
 
