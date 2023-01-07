@@ -74,7 +74,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/user_list" />
+        app:layout_constraintTop_toBottomOf="@+id/Url_list" />
 
     <ImageView
         android:id="@+id/divider_profile"
@@ -138,5 +138,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/view3" />
+        app:layout_constraintTop_toBottomOf="@+id/view3"
+        android:divider="@null"
+        android:dividerHeight="0dp"/>
 </androidx.constraintlayout.widget.ConstraintLayout>
