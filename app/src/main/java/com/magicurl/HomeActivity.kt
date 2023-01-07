@@ -174,6 +174,9 @@ class HomeActivity : AppCompatActivity() {
             this.db = database
 
         }
+        fun updateList() {
+            this.notifyDataSetChanged()
+        }
 
 
         //responsible for the number of rows in my list
@@ -253,7 +256,7 @@ class HomeActivity : AppCompatActivity() {
                         mContext.dataArray = modifiedList.sortedWith(compareBy({ it.first.toString().substringBefore("-") }))
                             .reversed().takeLast(3).toTypedArray()
 
-                        namePosition.text = editText.text.toString()
+                        updateList()
 
 
                     }
