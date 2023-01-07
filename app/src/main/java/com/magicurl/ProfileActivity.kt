@@ -20,10 +20,13 @@ import kotlinx.android.synthetic.main.activity_profile.*
 
 class ProfileActivity : AppCompatActivity() {
     private lateinit var database: DatabaseReference
+    private lateinit var myListView : ListView
+    private lateinit var dataArray: Array<Pair<*, *>>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_profile)
+        myListView = findViewById(R.id.Url_list)
 
         profile_home.setOnClickListener {
 
@@ -71,8 +74,11 @@ class ProfileActivity : AppCompatActivity() {
                 val adapter =
                     ArrayAdapter(this@ProfileActivity, android.R.layout.simple_list_item_1, array)
 
+                this.dataArray = array.sortedWith(compareBy({ it.first.toString().substringBefore("-") }))
+                    .reversed().toTypedArray()
+
                 // Set the adapter on the ListView
-                Url_list.adapter = MyCustomAdapter(this, array, database)
+                myListView.adapter = MyCustomAdapter(this, database)
 
                 println(map)
             }
@@ -82,20 +88,17 @@ class ProfileActivity : AppCompatActivity() {
     }
 
     private class MyCustomAdapter(
-        context: Context,
-        array: Array<Pair<*, *>>,
+        context: ProfileActivity,
         database: DatabaseReference
     ) : BaseAdapter() {
 
-        private val mContext: Context
-        private val linkArray: Array<Pair<*, *>>
+        private val mContext: ProfileActivity
         private val db: DatabaseReference
         val userId = FirebaseAuth.getInstance().currentUser?.uid.toString()
 
 
         init {
             this.mContext = context
-            this.linkArray = array
             this.db = database
 
         }
@@ -103,7 +106,7 @@ class ProfileActivity : AppCompatActivity() {
 
         //responsible for the number of rows in my list
         override fun getCount(): Int {
-            return linkArray.size
+            return mContext.dataArray.size
         }
 
         override fun getItemId(position: Int): Long {
@@ -114,28 +117,35 @@ class ProfileActivity : AppCompatActivity() {
             return "TEST"
         }
 
-
-        //responsible for rendering out each row
         override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
             val LayoutInflater = LayoutInflater.from(mContext)
             val mainRow = LayoutInflater.inflate(R.layout.home_row, parent, false)
             val namePosition = mainRow.findViewById<TextView>(R.id.name_textView)
             val urlPosition = mainRow.findViewById<TextView>(R.id.link_textView)
-            val delete = mainRow.findViewById<TextView>(R.id.delete)
-            val modify = mainRow.findViewById<TextView>(R.id.modify)
 
-            namePosition.text = linkArray.get(position).first.toString().substringAfter("-")
-            urlPosition.text = linkArray.get(position).second.toString()
+
+            namePosition.text = mContext.dataArray.get(position).first.toString().substringAfter("-")
+            urlPosition.text = mContext.dataArray.get(position).second.toString()
+
+            setListeners(position, mainRow)
+
+            return mainRow
+        }
+
+        private fun setListeners(position:Int, mainRow:View){
+            val delete = mainRow.findViewById<TextView>(R.id.delete)
+
             delete.setOnClickListener {
-                val deleteElement = linkArray.get(position).first.toString()
-                linkArray.drop(position)
+                val deleteElement = mContext.dataArray.get(position).first.toString()
+                val newList = mContext.dataArray.toMutableList()
+
+                newList.remove(mContext.dataArray[position])
+                mContext.dataArray = newList.toTypedArray()
+
                 db.child(userId).child("urls").child(deleteElement).removeValue()
 
+                this.notifyDataSetChanged()
             }
-            modify.setOnClickListener {
-
-            }
-            return mainRow
         }
     }
 }
