@@ -175,11 +175,8 @@ class HomeActivity : AppCompatActivity() {
             this.db = database
 
         }
-        fun updateList() {
-            this.notifyDataSetChanged()
-        }
 
-        fun updateList(){
+        fun updateList() {
             this.notifyDataSetChanged()
         }
 
