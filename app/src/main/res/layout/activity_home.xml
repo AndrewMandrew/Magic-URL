@@ -100,7 +100,7 @@
         android:layout_marginTop="16dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/divider"
-        app:srcCompat="@drawable/ic_home" />
+        app:srcCompat="@drawable/ic_home_blue" />
 
     <ImageView
         android:id="@+id/home_search"
