@@ -67,15 +67,21 @@ class HomeActivity : AppCompatActivity() {
                     ).show()
                 }
 
-                TextUtils.isEmpty(et_home_name.text.toString().trim { it <= ' ' }) or
-                        (et_home_name.text.toString().length > 20)-> {
+                TextUtils.isEmpty(et_home_name.text.toString().trim { it <= ' ' })
+                        -> {
                     Toast.makeText(
                         this@HomeActivity,
                         "Please enter a name for your URL!",
                         Toast.LENGTH_SHORT
                     ).show()
                 }
-
+                et_home_name.text.toString().length > 20-> {
+                    Toast.makeText(
+                        this@HomeActivity,
+                        "Your name is too long, the maximum is 20 characters",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
                 else -> {
                     magicifyLink().start()
 
