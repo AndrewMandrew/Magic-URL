@@ -5,11 +5,18 @@ import android.os.Bundle
 import android.text.TextUtils
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import com.google.firebase.auth.FirebaseAuth
+import com.magicurl.databinding.ActivityFavouriteBinding
+import com.magicurl.databinding.ActivityLoginBinding
 import kotlinx.android.synthetic.main.activity_login.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 
 class LoginActivity : AppCompatActivity() {
+    private lateinit var binding: ActivityLoginBinding
+    private lateinit var db : AppDatabase
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -18,6 +25,8 @@ class LoginActivity : AppCompatActivity() {
 
         // This is used to align the xml view to this class
         setContentView(R.layout.activity_login)
+        db = AppDatabase.getDatabase(this)
+
 
         tv_register.setOnClickListener {
 
@@ -53,6 +62,7 @@ class LoginActivity : AppCompatActivity() {
                     val email: String = et_login_email.text.toString().trim { it <= ' ' }
                     val password: String = et_login_password.text.toString().trim { it <= ' ' }
 
+
                     // Log-In using FirebaseAuth
                     FirebaseAuth.getInstance().signInWithEmailAndPassword(email, password)
                         .addOnCompleteListener { task ->
@@ -64,7 +74,13 @@ class LoginActivity : AppCompatActivity() {
                                     "You are logged in successfully.",
                                     Toast.LENGTH_SHORT
                                 ).show()
-
+                                val uid = FirebaseAuth.getInstance().currentUser!!.uid
+                                lifecycleScope.launch(Dispatchers.IO) {
+                                    val user = User(
+                                        null, email, password, uid
+                                    )
+                                    db.userDao().insert(user)
+                                }
                                 /**
                                  * Here the new user registered is automatically signed-in so we just sign-out the user from firebase
                                  * and send him to Main Screen with user id and email that user have used for registration.
@@ -95,5 +111,11 @@ class LoginActivity : AppCompatActivity() {
             }
         }
         // END
+    }
+
+    private fun writeData(email: String, password: String, uid: String ){
+
+
+
     }
 }

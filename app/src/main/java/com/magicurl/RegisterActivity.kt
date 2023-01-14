@@ -12,12 +12,16 @@ import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
+import com.magicurl.databinding.ActivityLoginBinding
 import kotlinx.android.synthetic.main.activity_register.*
-
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 
 class RegisterActivity : AppCompatActivity() {
     private lateinit var database: DatabaseReference
+    private lateinit var binding: ActivityLoginBinding
+    private lateinit var db : AppDatabase
 
     override fun onCreate(savedInstanceState: Bundle?) {
         //This call the parent constructor
@@ -81,6 +85,7 @@ class RegisterActivity : AppCompatActivity() {
                                     val reference = database.getReference(userId).child("username")
                                     reference.setValue(username)
 
+                                    writeData(email, password, userId)
                                     startActivity(intent)
                                     finish()
                                 } else {
@@ -104,6 +109,13 @@ class RegisterActivity : AppCompatActivity() {
         }
 
 
-
     }
-}
+    private fun writeData(email: String, password: String, uid: String ){
+
+        val user = User(
+            null,email,password,uid
+        )
+        db.userDao().insert(user)
+
+        }
+    }
