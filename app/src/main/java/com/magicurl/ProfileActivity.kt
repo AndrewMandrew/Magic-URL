@@ -10,25 +10,29 @@ import android.view.ViewGroup
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 import kotlinx.android.synthetic.main.activity_profile.*
-
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 
 class ProfileActivity : AppCompatActivity() {
     private lateinit var database: DatabaseReference
     private lateinit var myListView : ListView
     private lateinit var dataArray: Array<Pair<*, *>>
+    private lateinit var db : AppDatabase
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_profile)
         myListView = findViewById(R.id.Url_list)
 
+        db = AppDatabase.getDatabase(this)
         profile_home.setOnClickListener {
 
             startActivity(Intent(this@ProfileActivity, HomeActivity::class.java))
@@ -44,6 +48,10 @@ class ProfileActivity : AppCompatActivity() {
         btn_logout.setOnClickListener {
             // Logout from app.
             FirebaseAuth.getInstance().signOut()
+            lifecycleScope.launch(Dispatchers.IO){
+                db.userDao().deleteAll()
+            }.start()
+
 
             startActivity(Intent(this@ProfileActivity, LoginActivity::class.java))
             finish()
